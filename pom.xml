@@ -19,6 +19,8 @@
         <kotlin.version>1.3.31</kotlin.version>
     </properties>
 
+    <!-- TODO: add strict version each dependencies -->
+    <!-- TODO: add dependencies for unit testing -->
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
