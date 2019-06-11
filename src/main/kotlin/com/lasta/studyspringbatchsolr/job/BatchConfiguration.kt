@@ -10,6 +10,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
 import org.springframework.batch.core.launch.support.RunIdIncrementer
+import org.springframework.batch.core.step.tasklet.Tasklet
 import org.springframework.batch.item.file.FlatFileItemReader
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper
@@ -59,13 +60,18 @@ class BatchConfiguration(
     fun processor(): ZipCodeProcessor = ZipCodeProcessor()
 
     @Bean
-    fun indexZipCodeJob(jobBuilderFactory: JobBuilderFactory, indexingStep: Step, optimizeStep: Step): Job =
-            jobBuilderFactory.get("indexZipCode")
-                    .incrementer(RunIdIncrementer())
-                    .flow(indexingStep)
-                    .next(optimizeStep)
-                    .end()
-                    .build()
+    fun indexZipCodeJob(
+            jobBuilderFactory: JobBuilderFactory,
+            indexingStep: Step,
+            commitStep: Step,
+            optimizeStep: Step
+    ): Job = jobBuilderFactory.get("indexZipCode")
+            .incrementer(RunIdIncrementer())
+            .flow(indexingStep)
+            .next(commitStep)
+            .next(optimizeStep)
+            .end()
+            .build()
 
     @Bean
     fun indexingStep(
@@ -78,5 +84,21 @@ class BatchConfiguration(
             .reader(reader)
             .processor(processor)
             .writer(writer)
+            .build()
+
+    @Bean
+    fun commitStep(
+            stepBuilderFactory: StepBuilderFactory,
+            commitTask: Tasklet
+    ): Step = stepBuilderFactory.get("commitStep")
+            .tasklet(commitTask)
+            .build()
+
+    @Bean
+    fun optimizeStep(
+            stepBuilderFactory: StepBuilderFactory,
+            optimizeTask: Tasklet
+    ): Step = stepBuilderFactory.get("optimizeStep")
+            .tasklet(optimizeTask)
             .build()
 }
