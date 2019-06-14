@@ -23,9 +23,7 @@ import java.nio.file.Paths
 @Configuration
 @EnableBatchProcessing
 class BatchConfiguration(
-        @Autowired
         val jobBuilderFactory: JobBuilderFactory,
-        @Autowired
         val stepBuilderFactory: StepBuilderFactory
 ) {
 
